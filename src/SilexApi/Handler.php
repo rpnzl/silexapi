@@ -51,7 +51,7 @@ class Handler
         $this->app       = $app;
         $this->request   = $request;
         $this->path      = $path;
-        $this->controller_namespace = __NAMESPACE__.'\\'.Inflector::classify($version);
+        $this->controller_namespace = $this->app['api.namespace'].'\\'.Inflector::classify($version);
 
         // Remove non-query keys
         $this->query = array_diff_key($this->request->query->all(), array(

@@ -8,7 +8,9 @@ class ApiServiceProvider implements ServiceProviderInterface
 {
     public function register(Application $app)
     {
-        $app['api.name'] = 'API';
+        $app['api.name']      = 'API';
+        $app['api.namespace'] = 'Api';
+        
         $app['api'] = $app->share(function () use ($app) {
             return new ApiControllerProvider;
         });

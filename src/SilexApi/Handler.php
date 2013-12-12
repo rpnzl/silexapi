@@ -105,7 +105,7 @@ class Handler
 
             // Controller must exist
             if (!$this->route['controller']) {
-                throw new Exception('Echonest/Spotify API', 200);
+                throw new Exception($this->app['api.name'], 200);
             }
 
             // Build controller

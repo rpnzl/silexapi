@@ -27,7 +27,7 @@ class ApiControllerProvider implements ControllerProviderInterface
     /**
      * 
      */
-    public function requestHandler(Application $app, Request $request, $version, $path)
+    public function requestHandler(Application $app, Request $request, $version, $path = null)
     {
         // 
         // Build API Handler

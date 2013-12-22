@@ -18,31 +18,36 @@ class ApiControllerProvider implements ControllerProviderInterface
         /**
          * 
          */
-        $controllers->match('/{version}/{path}', function (Request $request, $version, $path) use ($app) {
-
-            // 
-            // Build API Handler
-            // 
-
-            $api  = new Handler($app, $request, $version, $path);
-            $data = $api->processRequest();
-
-            // 
-            // Build Response
-            // 
-
-            $response = new JsonResponse($data, $data['meta']['status']);
-
-            // Check for JSONP
-            if ($request->get('callback')) {
-                $response->setCallback($request->get('callback'));
-            }
-
-            return $response;
-        })
-        ->assert('path', '.*');
+        $controllers->match('/{version}/{path}', array($this, 'requestHandler'))->assert('path', '.*');
+        $controllers->match('/{version}',  array($this, 'requestHandler'));
 
         return $controllers;
+    }
+
+    /**
+     * 
+     */
+    public function requestHandler(Application $app, Request $request, $version, $path)
+    {
+        // 
+        // Build API Handler
+        // 
+
+        $api  = new Handler($app, $request, $version, $path);
+        $data = $api->processRequest();
+
+        // 
+        // Build Response
+        // 
+
+        $response = new JsonResponse($data, $data['meta']['status']);
+
+        // Check for JSONP
+        if ($request->get('callback')) {
+            $response->setCallback($request->get('callback'));
+        }
+
+        return $response;
     }
 }
 

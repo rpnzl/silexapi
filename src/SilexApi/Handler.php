@@ -53,6 +53,13 @@ class Handler
         $this->path      = $path;
         $this->controller_namespace = $this->app['api.namespace'].'\\'.str_replace('.', '_', Inflector::classify($version));
 
+        $app->before(function (Request $request) use ($app) {
+            if (0 === strpos($request->headers->get('Content-Type'), 'application/json')) {
+                $data = json_decode($request->getContent(), true);
+                $request->request->replace(is_array($data) ? $data : array());
+            }
+        });
+
         // Remove non-query keys
         $this->query = array_diff_key($this->request->query->all(), array(
             'key'   => 1,
@@ -130,8 +137,12 @@ class Handler
             if (!$this->route['method']) {
                 $this->route['method'] = strtolower($this->request->getMethod());
             } else if (!in_array($this->route['method'], $valid_methods)) {
-                array_unshift($this->args, $this->route['method']);
-                $this->route['method'] = strtolower($this->request->getMethod());
+                $original_method       = $this->route['method'];
+                $this->route['method'] = strtolower($this->request->getMethod()).ucfirst($this->route['method']);
+                if (!in_array($this->route['method'], $valid_methods)) {
+                    array_unshift($this->args, $original_method);
+                    $this->route['method'] = strtolower($this->request->getMethod());
+                }
             }
 
             // Sub-Method

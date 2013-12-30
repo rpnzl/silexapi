@@ -44,7 +44,7 @@ class Handler
 
     /**
      * Parses the request path and returns an
-     * instance of the correct Api controller.
+     * instance of the correct API controller.
      */
     public function __construct(Application $app, Request $request, $version, $path)
     {
@@ -52,13 +52,6 @@ class Handler
         $this->request = $request;
         $this->path    = $path;
         $this->controller_namespace = $this->app['api.namespace'].'\\'.str_replace('.', '_', Inflector::classify($version));
-
-        $app->before(function (Request $request) use ($app) {
-            if (0 === strpos($request->headers->get('Content-Type'), 'application/json')) {
-                $data = json_decode($request->getContent(), true);
-                $request->request->replace(is_array($data) ? $data : array());
-            }
-        });
 
         // Remove non-query keys
         $this->query = array_diff_key($this->request->query->all(), array(

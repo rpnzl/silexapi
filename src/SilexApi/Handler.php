@@ -48,9 +48,9 @@ class Handler
      */
     public function __construct(Application $app, Request $request, $version, $path)
     {
-        $this->app       = $app;
-        $this->request   = $request;
-        $this->path      = $path;
+        $this->app     = $app;
+        $this->request = $request;
+        $this->path    = $path;
         $this->controller_namespace = $this->app['api.namespace'].'\\'.str_replace('.', '_', Inflector::classify($version));
 
         $app->before(function (Request $request) use ($app) {
@@ -79,26 +79,6 @@ class Handler
     }
 
     /**
-     * Runs a few tests on the current request
-     * for basic validation.
-     */
-    private function authenticate()
-    {
-        // 
-        // $key = $this->request->get('key');
-
-        // // Check if API key exists
-        // if (empty($key)) {
-        //     throw new Exception('Missing Credentials', 403);
-        // }
-
-        // // Check that API key is valid
-        // if (!in_array($key, Config::get('users'))) {
-        //     throw new Exception('Invalid Credentials', 403);
-        // }
-    }
-
-    /**
      * Routes the request to the correct API
      * controller and method, handling API exceptions
      * and returning valid response arrays.
@@ -107,8 +87,12 @@ class Handler
     {
         try {
 
-            // Authenticate request
-            $this->authenticate();
+            // Authenticate request with user defined callback
+            if ( isset($this->app['api.authentication'])
+                 && is_callable($this->app['api.authentication'])
+            ) {
+                $this->app['api.authentication']($this->app, $this->request);
+            }
 
             // Controller must exist
             if (!$this->route['controller']) {

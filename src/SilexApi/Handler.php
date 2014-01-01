@@ -46,7 +46,7 @@ class Handler
      * Parses the request path and returns an
      * instance of the correct API controller.
      */
-    public function __construct(Application $app, Request $request, $version, $path)
+    public function __construct(Application $app, Request $request, $version = null, $path = null)
     {
         $this->app     = $app;
         $this->request = $request;

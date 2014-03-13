@@ -183,7 +183,7 @@ class Handler
      * status codes (e.g. Facebook's 803 => 404).
      * 
      * @param   $code  mixed   The status code
-     * @return  int    A valid HTTP status code
+     * @return  int  A valid HTTP status code
      */
     public function mapStatus($code)
     {
@@ -195,4 +195,4 @@ class Handler
     }
 }
 
-/* End of file Api.php */
+/* End of file Handler.php */

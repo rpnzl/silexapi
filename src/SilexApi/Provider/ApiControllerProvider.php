@@ -52,4 +52,4 @@ class ApiControllerProvider implements ControllerProviderInterface
     }
 }
 
-/*  */
+/* End of file ApiControllerProvider.php */

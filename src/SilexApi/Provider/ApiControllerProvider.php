@@ -41,7 +41,7 @@ class ApiControllerProvider implements ControllerProviderInterface
         // Build Response
         // 
 
-        $response = new JsonResponse($data, $data['meta']['status']);
+        $response = new JsonResponse($data, $api->mapStatus($data['meta']['status']));
 
         // Check for JSONP
         if ($request->get('callback')) {

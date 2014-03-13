@@ -5,6 +5,7 @@ use ReflectionClass;
 use ReflectionMethod;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Doctrine\Common\Inflector\Inflector;
 
 /**
@@ -159,15 +160,6 @@ class Handler
                 'message' => $e->getMessage(),
                 'status'  => $e->getCode()
             ));
-        } catch (Exception $e) {
-            $data = array('meta' => array(
-                'error'   => true,
-                'message' => $e->getMessage(),
-                'status'  => is_numeric($e->getCode())
-                             && $e->getCode() != 0
-                             && $e->getCode() >= 300
-                             && $e->getCode() <= 503 ? $e->getCode() : 500
-            ));
         }
 
         return array_replace_recursive($this->default_response, $data);
@@ -184,6 +176,22 @@ class Handler
     public function query($key, $default = null)
     {
         return isset($this->query[$key]) ? $this->query[$key] : $default;
+    }
+
+    /**
+     * Allows for mapping of custom application status codes to valid HTTP
+     * status codes (e.g. Facebook's 803 => 404).
+     * 
+     * @param   $code  mixed   The status code
+     * @return  int    A valid HTTP status code
+     */
+    public function mapStatus($code)
+    {
+        if (array_key_exists($code, $this->app['api.http_status_codes'])) {
+            $code = (int) $this->app['api.http_status_codes'][$code];
+        }
+
+        return array_key_exists($code, Response::$statusTexts) ? $code : 500;
     }
 }
 

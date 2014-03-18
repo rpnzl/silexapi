@@ -18,9 +18,8 @@ class ApiControllerProvider implements ControllerProviderInterface
         /**
          * 
          */
-        $controllers->match('/{version}/{path}', array($this, 'requestHandler'))->assert('path', '.*');
-        $controllers->match('/{version}',        array($this, 'requestHandler'));
-        $controllers->match('/',                 array($this, 'requestHandler'));
+        $controllers->match('/{path}', array($this, 'requestHandler'))->assert('path', '.*');
+        $controllers->match('/',       array($this, 'requestHandler'));
 
         return $controllers;
     }
@@ -28,13 +27,13 @@ class ApiControllerProvider implements ControllerProviderInterface
     /**
      * 
      */
-    public function requestHandler(Application $app, Request $request, $version = null, $path = null)
+    public function requestHandler(Application $app, Request $request, $path = null)
     {
         // 
         // Build API Handler
         // 
 
-        $api  = new Handler($app, $request, $version, $path);
+        $api  = new Handler($app, $request, $path);
         $data = $api->processRequest();
 
         // 

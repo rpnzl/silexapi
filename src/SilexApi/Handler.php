@@ -47,12 +47,11 @@ class Handler
      * Parses the request path and returns an
      * instance of the correct API controller.
      */
-    public function __construct(Application $app, Request $request, $version = null, $path = null)
+    public function __construct(Application $app, Request $request, $path = null)
     {
         $this->app     = $app;
         $this->request = $request;
         $this->path    = $path;
-        $this->controller_namespace = $this->app['api.namespace'].'\\'.str_replace('.', '_', Inflector::classify($version));
 
         // Remove non-query keys
         $this->query = array_diff_key($this->request->query->all(), array(
@@ -65,11 +64,10 @@ class Handler
         $this->pagination = array_map('intval', array_merge($this->pagination, array_intersect_key($this->request->query->all(), $this->pagination)));
         $this->pagination['offset'] = $this->pagination['count']*$this->pagination['page'] ?: 0;
 
-        // $bits = explode('?', str_replace($this->base_path, '', $this->request->getRequestUri()), 2);
-        $bits = array_filter(explode('/', trim($this->path)));
-
-        $this->route = array_combine($this->route, array_replace(array_fill(0, 2, null), array_slice($bits, 0, 2)));
-        $this->args  = array_slice($bits, 2);
+        // Split path into route bits
+        // $bits = array_filter(explode('/', trim($this->path)));
+        // $this->route = array_combine($this->route, array_replace(array_fill(0, 2, null), array_slice($bits, 0, 2)));
+        // $this->args  = array_slice($bits, 2);
     }
 
     /**
@@ -89,23 +87,37 @@ class Handler
             }
 
             // Controller must exist
-            if (!$this->route['controller']) {
-                throw new Exception($this->app['api.name'], 200);
+            if (empty($this->path)) {
+                return array_replace_recursive($this->default_response, array(
+                    'meta' => array('message' => $this->app['api.name'])
+                ));
             }
 
             // Build controller
-            $controller_class = $this->controller_namespace;
-            foreach ($this->route as $segment) {
-                $controller_class = $controller_class.'\\'.Inflector::classify($segment);
-                if (class_exists($controller_class)) break;
+            $controller_class = $this->app['api.namespace'];
+            $bits = explode('/', $this->path);
+            for ($i = 0, $l = count($bits); $i < $l; $i++) {
+                $controller_class = $controller_class.'\\'.Inflector::classify($bits[$i]);
+                if (class_exists($controller_class)) {
+                    $this->args = array_slice($bits, $i + 1, $l);
+                    $this->route = array_combine(
+                        $this->route,
+                        array_replace(
+                            array_fill(0, 2, null),
+                            array($controller_class, array_pop($this->args))
+                        )
+                    );
+                    unset($controller_class);
+                    break;
+                }
             }
 
-            // Verify a controller was found
-            if (!class_exists($controller_class)) {
+            // Verify that a controller was found
+            if (!class_exists($this->route['controller'])) {
                 throw new Exception("That's an invalid endpoint!", 403);
             }
 
-            $controller = new $controller_class($this->app, $this->request);
+            $controller = new $this->route['controller']($this->app, $this->request);
 
             // Get an array of valid method names from controller class,
             // removing any methods inherited from the base API class.

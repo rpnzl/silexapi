@@ -94,7 +94,13 @@ class Handler
             }
 
             // Build controller
-            $controller_class = $this->controller_namespace.'\\'.Inflector::classify($this->route['controller']);
+            $controller_class = $this->controller_namespace;
+            foreach ($this->route as $segment) {
+                $controller_class = $controller_class.'\\'.Inflector::classify($segment);
+                if (class_exists($controller_class)) break;
+            }
+
+            // Verify a controller was found
             if (!class_exists($controller_class)) {
                 throw new Exception("That's an invalid endpoint!", 403);
             }

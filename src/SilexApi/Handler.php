@@ -63,11 +63,6 @@ class Handler
         // Set pagination parameters
         $this->pagination = array_map('intval', array_merge($this->pagination, array_intersect_key($this->request->query->all(), $this->pagination)));
         $this->pagination['offset'] = $this->pagination['count']*$this->pagination['page'] ?: 0;
-
-        // Split path into route bits
-        // $bits = array_filter(explode('/', trim($this->path)));
-        // $this->route = array_combine($this->route, array_replace(array_fill(0, 2, null), array_slice($bits, 0, 2)));
-        // $this->args  = array_slice($bits, 2);
     }
 
     /**
@@ -104,7 +99,7 @@ class Handler
                         $this->route,
                         array_replace(
                             array_fill(0, 2, null),
-                            array($controller_class, array_pop($this->args))
+                            array($controller_class, array_shift($this->args))
                         )
                     );
                     unset($controller_class);

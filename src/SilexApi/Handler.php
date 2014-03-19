@@ -28,7 +28,7 @@ class Handler
     protected $pagination = array('page' => 1, 'count' => 10);
 
     /** @var  $route  arr  Contains the current route pieces */
-    private $route = array('controller', 'method');
+    private $route = array('controller' => null, 'method' => null);
 
     /** @var  $args  arr  Any arguments passed as a URI segment */
     private $args = array();
@@ -89,20 +89,13 @@ class Handler
             }
 
             // Build controller
-            $controller_class = $this->app['api.namespace'];
             $bits = explode('/', $this->path);
             for ($i = 0, $l = count($bits); $i < $l; $i++) {
-                $controller_class = $controller_class.'\\'.Inflector::classify($bits[$i]);
-                if (class_exists($controller_class)) {
+                if (!$i) $this->route['controller'] = $this->app['api.namespace'];
+                $this->route['controller'].= '\\'.Inflector::classify($bits[$i]);
+                if (class_exists($this->route['controller'])) {
                     $this->args = array_slice($bits, $i + 1, $l);
-                    $this->route = array_combine(
-                        $this->route,
-                        array_replace(
-                            array_fill(0, 2, null),
-                            array($controller_class, array_shift($this->args))
-                        )
-                    );
-                    unset($controller_class);
+                    $this->route['method'] = array_shift($this->args);
                     break;
                 }
             }

@@ -1,11 +1,10 @@
 {
     "name": "rpnzl/silexapi",
-
     "require": {
+        "composer/composer": "1.0.*@dev",
         "silex/silex": "1.2.*@dev",
         "doctrine/inflector": "1.0.*@dev"
     },
-
     "autoload": {
         "psr-0": {"SilexApi": "src/"}
     }

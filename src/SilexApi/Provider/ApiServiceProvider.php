@@ -4,6 +4,10 @@ namespace SilexApi\Provider;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Composer\Autoload\ClassMapGenerator;
+use ReflectionClass;
+use ReflectionMethod;
+use RuntimeException;
 
 class ApiServiceProvider implements ServiceProviderInterface
 {
@@ -29,7 +33,7 @@ class ApiServiceProvider implements ServiceProviderInterface
             $classes = array_filter(array_map(function ($v) use ($app) {
                 preg_match('#^'.$app['api.namespace'].'#', $v, $matches);
                 return count($matches) ? $v : null;
-            }, array_keys(Composer\Autoload\ClassMapGenerator::createMap($app['api.source_path']))));
+            }, array_keys(ClassMapGenerator::createMap($app['api.source_path']))));
 
             $routes = array();
             foreach ($classes as $v) {

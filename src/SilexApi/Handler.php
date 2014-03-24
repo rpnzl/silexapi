@@ -91,7 +91,7 @@ class Handler
             // Build controller
             $bits = explode('/', $this->path);
             for ($i = 0, $l = count($bits); $i < $l; $i++) {
-                $this->route['controller'].= ($i > 0 ? '\\' : '').Inflector::classify($bits[$i]);
+                $this->route['controller'].= ($i > 0 ? '' : $this->app['api.namespace']).'\\'.Inflector::classify($bits[$i]);
                 if (class_exists($this->route['controller'])) {
                     $this->args = array_slice($bits, $i + 1, $l);
                     $this->route['method'] = array_shift($this->args);

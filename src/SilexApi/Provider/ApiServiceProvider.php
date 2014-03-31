@@ -87,7 +87,6 @@ class ApiServiceProvider implements ServiceProviderInterface
     {
         // Mount at the given point
         $app->mount($app['api.mount_point'], $app['api']);
-        var_dump($app['api.routes']); die;
     }
 }
 

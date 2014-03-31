@@ -13,18 +13,26 @@ class ApiServiceProvider implements ServiceProviderInterface
 {
     public function register(Application $app)
     {
+        // API name
         $app['api.name']              = 'API';
+
+        // The base namespace, is not included in route paths
         $app['api.namespace']         = 'Api';
+
+        // The base route for the API
+        $app['api.mount_point']       = '/'.strtolower($app['api.namespace']);
+
+        // Application-specific status codes that map to valid HTTP codes
         $app['api.http_status_codes'] = array(
             // 803 => 404
         );
 
-        // 
+        // API Controller
         $app['api'] = $app->share(function () use ($app) {
             return new ApiControllerProvider;
         });
 
-        // 
+        // Routes Array
         $app['api.routes'] = $app->share(function () use ($app) {
             if (!is_dir($app['api.source_path'])) {
                 throw new RuntimeException("api.source_path must be defined to use api.routes!");
@@ -52,10 +60,19 @@ class ApiServiceProvider implements ServiceProviderInterface
                 $routes = array_merge($routes, $class_routes);
             }
 
+            // Alter routes array if the mountpoint is different from the namespace
+            $normalized_namespace = strtolower(str_replace('\\', '', $app['api.namespace']));
+            $normalized_mount_point = strtolower(str_replace('/', '', $app['api.mount_point']));
+            if ($normalized_namespace !== $normalized_mount_point) {
+                foreach ($routes as $k => $v) {
+                    $routes[$k] = preg_replace('#\/{2,4}#', '/', str_replace($normalized_namespace, $normalized_mount_point, $v));
+                }
+            }
+
             return $routes ?: array();
         });
 
-        // 
+        // Handle JSON Request Bodies
         $app->before(function (Request $request) use ($app) {
             if (0 === strpos($request->headers->get('Content-Type'), 'application/json')) {
                 $data = json_decode($request->getContent(), true);
@@ -68,6 +85,9 @@ class ApiServiceProvider implements ServiceProviderInterface
 
     public function boot(Application $app)
     {
+        // Mount at the given point
+        $app->mount($app['api.mount_point'], $app['api']);
+        var_dump($app['api.routes']); die;
     }
 }
 

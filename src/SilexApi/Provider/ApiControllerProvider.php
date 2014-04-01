@@ -34,7 +34,7 @@ class ApiControllerProvider implements ControllerProviderInterface
         // Build API Handler
         // 
 
-        $app['dispatcher']->dispatch('api.after_request', new GenericEvent($request));
+        $app['dispatcher']->dispatch('api.before_request', new GenericEvent($request));
         $api  = new Handler($app, $request, $path);
         $data = $api->processRequest();
 

@@ -47,15 +47,28 @@ class ApiServiceProvider implements ServiceProviderInterface
             foreach ($classes as $v) {
                 $class = new ReflectionClass($v);
                 $class_routes = array_filter(array_map(function ($v) use ($class) {
+                    
+                    $route = null;
                     $http_methods = array('get', 'post', 'put', 'delete');
                     preg_match('#^'.implode('|', $http_methods).'#', $v->name, $matches);
+
                     if (in_array($v->name, $http_methods)) {
-                        return strtoupper($matches[0]).' /'.strtolower(str_replace('\\', '/', $class->name));
+                        $route = strtoupper($matches[0]).' /'.strtolower(str_replace('\\', '/', $class->name));
                     } else if (count($matches)) {
                         $segment = str_replace($matches[0], '', $v->name);
                         $base_route = str_replace('\\', '/', $class->name);
-                        return strtoupper($matches[0]).' /'.strtolower($base_route.'/'.$segment);
+                        $route = strtoupper($matches[0]).' /'.strtolower($base_route.'/'.$segment);
                     }
+
+                    // 
+                    if (isset($route)) {
+                        foreach ($v->getParameters() as $p) {
+                            $route.= sprintf(($p->isOptional() ? '/[:%s]' : '/:%s'), $p->name);
+                        }
+
+                        return $route;
+                    }
+
                 }, $class->getMethods(ReflectionMethod::IS_PUBLIC)));
                 $routes = array_merge($routes, $class_routes);
             }
